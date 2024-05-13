@@ -37,7 +37,7 @@ jobs:
       run: |
         git lfs install
         huggingface-cli lfs-enable-largefiles .
-        huggingface-cli repo create reviewerarena/reviewer-arena --type=space --private
+        huggingface-cli repo create reviewerarena/reviewer-arena --type=space --visibility=private
         huggingface-cli repo upload reviewerarena/reviewer-arena . --all-yes
   #  - name: Login to Hugging Face
   #     env:
