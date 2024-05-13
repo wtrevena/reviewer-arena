@@ -165,4 +165,4 @@ if __name__ == "__main__":
     # BLOCK PATHS OF ALL THE FILES AND LAUNCH THE APP
     
     
-    demo.launch(auth=(os.environ.get('LOGIN_USERNAME'), os.environ.get('LOGIN_PASSWORD')), share=True)
+    demo.launch(auth=(os.environ.get('login_username'), os.environ.get('login_password')), share=True)

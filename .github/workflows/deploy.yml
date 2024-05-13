@@ -29,16 +29,16 @@ jobs:
       run: |
         huggingface-cli login --token $HUGGINGFACE_TOKEN
 
-    # - name: Deploy Gradio App 
-    #   run: gradio deploy
-    - name: Upload to Hugging Face Spaces
-      env:
-        HF_TOKEN: ${{ secrets.HUGGING_FACE_TOKEN }}
-      run: |
-        git lfs install
-        huggingface-cli lfs-enable-largefiles .
-        huggingface-cli repo create reviewerarena/reviewer-arena --type=space 
-        huggingface-cli repo upload reviewerarena/reviewer-arena . --all-yes
+    - name: Deploy Gradio App 
+      run: gradio deploy
+    # - name: Upload to Hugging Face Spaces
+    #   env:
+    #     HF_TOKEN: ${{ secrets.HUGGING_FACE_TOKEN }}
+    #   run: |
+    #     git lfs install
+    #     huggingface-cli lfs-enable-largefiles .
+    #     huggingface-cli repo create reviewerarena/reviewer-arena --type=space 
+    #     huggingface-cli repo upload reviewerarena/reviewer-arena . --all-yes
   #  - name: Login to Hugging Face
   #     env:
   #       HUGGINGFACE_TOKEN: ${{ secrets.HUGGING_FACE_TOKEN }}
