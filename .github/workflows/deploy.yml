@@ -30,7 +30,9 @@ jobs:
         huggingface-cli login --token $HUGGINGFACE_TOKEN
 
     - name: Deploy Gradio App 
-      run: gradio deploy --token ${{ secrets.HUGGING_FACE_TOKEN }}
+      env:
+        HUGGINGFACE_TOKEN: ${{ secrets.HUGGING_FACE_TOKEN }}
+      run: gradio deploy 
     # - name: Upload to Hugging Face Spaces
     #   env:
     #     HF_TOKEN: ${{ secrets.HUGGING_FACE_TOKEN }}
