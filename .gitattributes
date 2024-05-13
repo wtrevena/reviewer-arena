@@ -1,0 +1,16 @@
+# HIDE ALL OF THE FILES IN THE DIRECTORY
+*.py
+*.log
+*.md
+*.txt
+iclr2024/**
+*.github/**
+*.gitignore
+*.gitattributes
+*.git/**
+*.__pycache__/**
+
+
+
+
+

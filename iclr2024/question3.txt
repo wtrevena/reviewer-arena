@@ -1,0 +1,1 @@
+Please assign the paper a numerical rating on the following scale to indicate the quality of the presentation. This should take into account the writing style and clarity, as well as contextualization relative to prior work: 4 excellent, 3 good, 2 fair, 1 poor.
