@@ -9,6 +9,12 @@ from flask import request
 import hashlib
 import uuid
 import json
+from dotenv import load_dotenv
+
+try:
+    load_dotenv()
+except:
+    pass
 
 setup_logging()
 paper_dir = 'path_to_temp_storage'
