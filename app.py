@@ -167,7 +167,7 @@ def setup_interface():
                     fn=review_papers,
                     inputs=[file_input],
                     outputs=[review1, review2, vote, vote_button,
-                             model_identity_message, model_identity_message]
+                             model_identity_message, model_identity_message] 
                 )
 
                 another_paper_button.click(
