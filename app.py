@@ -170,7 +170,7 @@ def setup_interface():
 
                 # Fetch the leaderboard data from the database
                 leaderboard_data = get_leaderboard()
-                print(json.dumps(leaderboard_data))
+                print(leaderboard_data)
                 
                 # Create the leaderboard HTML dynamically
                 leaderboard_html = """
