@@ -35,13 +35,13 @@ def generate_paper_id(paper_content):
     return hashlib.sha512(paper_content).hexdigest()
 
 # Function to get user IP address
-def get_user_ip():
-    try:
-        return request.remote_addr
-    except:
-        return "Unknown"
+# def get_user_ip():
+#     try:
+#         return request.remote_addr
+#     except:
+#         return "Unknown"
 
-def review_papers(pdf_file):
+def review_papers(pdf_file, user_ip):
     logging.info(f"Received file type: {type(pdf_file)}")
     paper_content = pdf_file.read() if hasattr(pdf_file, 'read') else pdf_file  # Read the content of the uploaded PDF file
     if use_real_api:
@@ -103,8 +103,8 @@ def review_papers(pdf_file):
     logging.debug(f"Final formatted reviews: {review_texts}")
     return review_texts[0], review_texts[1], gr.update(visible=True), gr.update(visible=True), model_a, model_b, paper_content
 
-def handle_vote(vote, model_a, model_b, paper_content):
-    user_id = get_user_ip()  # Get the user IP address as user_id
+def handle_vote(vote, model_a, model_b, paper_content, user_ip):
+    user_id = user_ip  # Use the passed user IP address as user_id
     paper_id = generate_paper_id(paper_content)  # Generate paper_id from paper content
     
     # Write the request
@@ -167,46 +167,58 @@ def setup_interface():
     }
     """
     with gr.Blocks(css=css) as demo:
-        with gr.Tabs():
-            with gr.TabItem("Reviewer Arena"):
-                gr.Markdown("## Reviewer Arena")
-                gr.Markdown("Upload an academic paper to get reviews from two randomly selected LLMs.")
-                with gr.Row():
-                    file_input = gr.File(label="Upload Academic Paper")
-                    submit_button = gr.Button("Submit!", elem_id="submit-button")
-                with gr.Row():
-                    with gr.Column():
-                        gr.HTML("<div class='model-label'>Model A</div>")
-                        review1 = gr.Markdown()
-                    with gr.Column():
-                        gr.HTML("<div class='model-label'>Model B</div>")
-                        review2 = gr.Markdown()
+        with gr.HTML("""
+            <input type="hidden" id="user-ip" value="">
+            <script>
+                async function getUserIP() {
+                    const response = await fetch('https://api.ipify.org?format=json');
+                    const data = await response.json();
+                    document.getElementById('user-ip').value = data.ip;
+                }
+                window.onload = getUserIP;
+            </script>
+        """):
+            with gr.Tabs():
+                with gr.TabItem("Reviewer Arena"):
+                    gr.Markdown("## Reviewer Arena")
+                    gr.Markdown("Upload an academic paper to get reviews from two randomly selected LLMs.")
+                    with gr.Row():
+                        file_input = gr.File(label="Upload Academic Paper")
+                        submit_button = gr.Button("Submit!", elem_id="submit-button")
+                    with gr.Row():
+                        with gr.Column():
+                            gr.HTML("<div class='model-label'>Model A</div>")
+                            review1 = gr.Markdown()
+                        with gr.Column():
+                            gr.HTML("<div class='model-label'>Model B</div>")
+                            review2 = gr.Markdown()
 
-                vote_options = ["👍 A is better", "👍 B is better", "👔 Tie", "👎 Both are bad"]
-                vote = gr.Radio(label="Vote on the best model", choices=vote_options, value="Tie", visible=False)
-                vote_button = gr.Button("Submit Vote", visible=False)
-                vote_message = gr.HTML("", visible=False)
-                another_paper_button = gr.Button("Review another paper", visible=False)
+                    vote_options = ["👍 A is better", "👍 B is better", "👔 Tie", "👎 Both are bad"]
+                    vote = gr.Radio(label="Vote on the best model", choices=vote_options, value="Tie", visible=False)
+                    vote_button = gr.Button("Submit Vote", visible=False)
+                    vote_message = gr.HTML("", visible=False)
+                    another_paper_button = gr.Button("Review another paper", visible=False)
 
-                model_identity_message = gr.HTML("", visible=False)
+                    model_identity_message = gr.HTML("", visible=False)
 
-                def handle_vote_interface(vote, model_identity_message_a, model_identity_message_b, paper_content, user_ip):
-                    return handle_vote(vote, model_identity_message_a, model_identity_message_b, paper_content, user_ip)
+                    def handle_vote_interface(vote, model_identity_message_a, model_identity_message_b, paper_content, user_ip):
+                        return handle_vote(vote, model_identity_message_a, model_identity_message_b, paper_content, user_ip)
 
-                submit_button.click(fn=review_papers, inputs=[file_input, gr.Textbox(visible=False, value=lambda: request.remote_addr)],
-                    outputs=[review1, review2, vote, vote_button, model_identity_message, model_identity_message])
+                    submit_button.click(fn=review_papers, inputs=[file_input, gr.Textbox(visible=False, value=lambda: document.getElementById('user-ip').value)],
+                        outputs=[review1, review2, vote, vote_button, model_identity_message, model_identity_message])
 
-                vote_button.click(fn=handle_vote_interface, inputs=[vote, model_identity_message, model_identity_message, file_input, gr.Textbox(visible=False, value=lambda: request.remote_addr)],
-                                outputs=[vote_message, vote, vote_button, another_paper_button])
+                    vote_button.click(fn=handle_vote_interface, inputs=[vote, model_identity_message, model_identity_message, file_input, gr.Textbox(visible=False, value=lambda: document.getElementById('user-ip').value)],
+                                      outputs=[vote_message, vote, vote_button, another_paper_button])
 
-                another_paper_button.click(fn=lambda: None, inputs=None, outputs=None, js="() => { location.reload(); }")
+                    another_paper_button.click(fn=lambda: None, inputs=None, outputs=None, js="() => { location.reload(); }")
 
-            with gr.TabItem("Leaderboard"):
-                gr.Markdown("## Leaderboard")
+                with gr.TabItem("Leaderboard"):
+                    gr.Markdown("## Leaderboard")
 
-                # Fetch the leaderboard data from the database
-                leaderboard_data = get_leaderboard()
-                print(leaderboard_data)
+                    # Fetch the leaderboard data from the database
+                    leaderboard_data = get_leaderboard()
+                    print(leaderboard_data)
+                    
                 
                 # Create the leaderboard HTML dynamically
                 leaderboard_html = """
@@ -250,6 +262,8 @@ def setup_interface():
 
     logging.debug("Gradio interface setup complete.")
     return demo
+
+
 
 
 if __name__ == "__main__":
