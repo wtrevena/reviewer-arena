@@ -166,8 +166,11 @@ def setup_interface():
 
             with gr.TabItem("Leaderboard"):
                 gr.Markdown("## Leaderboard")
+
                 # Fetch the leaderboard data from the database
                 leaderboard_data = get_leaderboard()
+                
+                # Create the leaderboard HTML dynamically
                 leaderboard_html = """
                     <table style="width:100%; border: 1px solid #444; border-collapse: collapse; font-family: Arial, sans-serif; background-color: #2b2b2b;">
                         <thead>
@@ -183,59 +186,22 @@ def setup_interface():
                             </tr>
                         </thead>
                         <tbody>
-                            <tr style="border: 1px solid #444; padding: 12px;">
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">1</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">GPT-4-Turbo-2024-04-09</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">1258</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">+3/-3</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">44592</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">OpenAI</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Proprietary</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">2023/12</td>
-                            </tr>
-                            <tr style="border: 1px solid #444; padding: 12px;">
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">2</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">GPT-4-1106-preview</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">1252</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">+2/-3</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">76173</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">OpenAI</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Proprietary</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">2023/4</td>
-                            </tr>
-                            <tr style="border: 1px solid #444; padding: 12px;">
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">2</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Gemini 1.5 Pro API-0409-Preview</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">1249</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">+3/-3</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">61011</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Google</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Proprietary</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">2023/11</td>
-                            </tr>
-                            <tr style="border: 1px solid #444; padding: 12px;">
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">2</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Claude 3 Opus</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">1248</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">+2/-2</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">101063</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Anthropic</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Proprietary</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">2023/8</td>
-                            </tr>
-                            <tr style="border: 1px solid #444; padding: 12px;">
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">3</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">GPT-4-0125-preview</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">1246</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">+3/-2</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">70239</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">OpenAI</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Proprietary</td>
-                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">2023/12</td>
-                            </tr>
-                        </tbody>
-                    </table>
                 """
+                
+                for rank, model in enumerate(leaderboard_data, start=1):
+                    leaderboard_html += f"""
+                        <tr style="border: 1px solid #444; padding: 12px;">
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{rank}</td>
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['ModelID']}</td>
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['EloScore']}</td>
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">+3/-3</td> <!-- Adjust as needed -->
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['Votes']}</td>
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Organization</td> <!-- Add actual data if available -->
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">License</td> <!-- Add actual data if available -->
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Knowledge Cutoff</td> <!-- Add actual data if available -->
+                        </tr>
+                    """
+
                 leaderboard_html += """
                         </tbody>
                     </table>
