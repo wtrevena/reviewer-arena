@@ -2,3 +2,5 @@ my-venv/
 old/
 arena.log
 .env
+__pycache__
+
