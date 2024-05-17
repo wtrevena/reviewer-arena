@@ -30,6 +30,8 @@ use_real_api = False
 
 # Function to generate a paper_id using SHA-512 hash
 def generate_paper_id(paper_content):
+    if isinstance(paper_content, str):
+        paper_content = paper_content.encode('utf-8')
     return hashlib.sha512(paper_content).hexdigest()
 
 # Function to get user IP address
@@ -188,14 +190,14 @@ def setup_interface():
 
                 model_identity_message = gr.HTML("", visible=False)
 
-                def handle_vote_interface(vote, model_identity_message_a, model_identity_message_b, paper_content):
-                    return handle_vote(vote, model_identity_message_a, model_identity_message_b, paper_content)
+                def handle_vote_interface(vote, model_identity_message_a, model_identity_message_b, paper_content, user_ip):
+                    return handle_vote(vote, model_identity_message_a, model_identity_message_b, paper_content, user_ip)
 
-                submit_button.click(fn=review_papers, inputs=[file_input],
-                                    outputs=[review1, review2, vote, vote_button, model_identity_message, model_identity_message])
+                submit_button.click(fn=review_papers, inputs=[file_input, gr.Textbox(visible=False, value=lambda: request.remote_addr)],
+                    outputs=[review1, review2, vote, vote_button, model_identity_message, model_identity_message])
 
-                vote_button.click(fn=handle_vote_interface, inputs=[vote, model_identity_message, model_identity_message],
-                                  outputs=[vote_message, vote, vote_button, another_paper_button])
+                vote_button.click(fn=handle_vote_interface, inputs=[vote, model_identity_message, model_identity_message, file_input, gr.Textbox(visible=False, value=lambda: request.remote_addr)],
+                                outputs=[vote_message, vote, vote_button, another_paper_button])
 
                 another_paper_button.click(fn=lambda: None, inputs=None, outputs=None, js="() => { location.reload(); }")
 
