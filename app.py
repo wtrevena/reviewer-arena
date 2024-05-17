@@ -157,15 +157,17 @@ def setup_interface():
                     return handle_vote(vote, model_identity_message_a, model_identity_message_b, paper_content)
 
                 submit_button.click(fn=review_papers, inputs=[file_input],
-                                    outputs=[review1, review2, vote, vote_button, model_identity_message, model_identity_message, "paper_content"])
+                                    outputs=[review1, review2, vote, vote_button, model_identity_message, model_identity_message])
 
-                vote_button.click(fn=handle_vote_interface, inputs=[vote, model_identity_message, model_identity_message, "paper_content"],
+                vote_button.click(fn=handle_vote_interface, inputs=[vote, model_identity_message, model_identity_message],
                                   outputs=[vote_message, vote, vote_button, another_paper_button])
 
                 another_paper_button.click(fn=lambda: None, inputs=None, outputs=None, js="() => { location.reload(); }")
 
             with gr.TabItem("Leaderboard"):
                 gr.Markdown("## Leaderboard")
+                # Fetch the leaderboard data from the database
+                leaderboard_data = get_leaderboard()
                 leaderboard_html = """
                     <table style="width:100%; border: 1px solid #444; border-collapse: collapse; font-family: Arial, sans-serif; background-color: #2b2b2b;">
                         <thead>
@@ -234,8 +236,13 @@ def setup_interface():
                         </tbody>
                     </table>
                 """
-                leaderboard = get_leaderboard()
+                leaderboard_html += """
+                        </tbody>
+                    </table>
+                """
+                
                 gr.HTML(leaderboard_html)
+
 
     logging.debug("Gradio interface setup complete.")
     return demo
