@@ -8,6 +8,7 @@ from aws_utils import update_leaderboard, get_leaderboard, write_request
 from flask import request
 import hashlib
 import uuid
+import json
 
 setup_logging()
 paper_dir = 'path_to_temp_storage'
@@ -169,6 +170,7 @@ def setup_interface():
 
                 # Fetch the leaderboard data from the database
                 leaderboard_data = get_leaderboard()
+                print(json.dumps(leaderboard_data))
                 
                 # Create the leaderboard HTML dynamically
                 leaderboard_html = """
@@ -188,19 +190,19 @@ def setup_interface():
                         <tbody>
                 """
                 
-                for rank, model in enumerate(leaderboard_data, start=1):
-                    leaderboard_html += f"""
-                        <tr style="border: 1px solid #444; padding: 12px;">
-                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{rank}</td>
-                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['ModelID']}</td>
-                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['EloScore']}</td>
-                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">+3/-3</td> <!-- Adjust as needed -->
-                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['Votes']}</td>
-                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Organization</td> <!-- Add actual data if available -->
-                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">License</td> <!-- Add actual data if available -->
-                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Knowledge Cutoff</td> <!-- Add actual data if available -->
-                        </tr>
-                    """
+                # for rank, model in enumerate(leaderboard_data, start=1):
+                #     leaderboard_html += f"""
+                #         <tr style="border: 1px solid #444; padding: 12px;">
+                #             <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{rank}</td>
+                #             <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['ModelID']}</td>
+                #             <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['EloScore']}</td>
+                #             <td style="border: 1px solid #444; padding: 12px; color: #ddd;">+3/-3</td> <!-- Adjust as needed -->
+                #             <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['Votes']}</td>
+                #             <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Organization</td> <!-- Add actual data if available -->
+                #             <td style="border: 1px solid #444; padding: 12px; color: #ddd;">License</td> <!-- Add actual data if available -->
+                #             <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Knowledge Cutoff</td> <!-- Add actual data if available -->
+                #         </tr>
+                #     """
 
                 leaderboard_html += """
                         </tbody>
