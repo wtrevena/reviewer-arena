@@ -4,6 +4,11 @@ import os
 import logging
 import html
 from logging_config import setup_logging
+from aws_utils import update_leaderboard, get_leaderboard, write_request
+from flask import request
+import hashlib
+import uuid
+
 
 setup_logging()
 paper_dir = 'path_to_temp_storage'
@@ -17,6 +22,14 @@ api_keys = {
 
 use_real_api = False
 
+
+# Function to generate a paper_id using SHA-512 hash
+def generate_paper_id(paper_content):
+    return hashlib.sha512(paper_content).hexdigest()
+
+# Function to get user IP address
+def get_user_ip():
+    return request.remote_addr
 
 def review_papers(pdf_file):
     logging.info(f"Received file type: {type(pdf_file)}")
@@ -78,6 +91,23 @@ def review_papers(pdf_file):
 
     logging.debug(f"Final formatted reviews: {review_texts}")
     return review_texts[0], review_texts[1], gr.update(visible=True), gr.update(visible=True), model_a, model_b
+
+
+def handle_vote(vote, model_a, model_b, paper_content):
+    user_id = get_user_ip()  # Get the user IP address as user_id
+    paper_id = generate_paper_id(paper_content.encode('utf-8'))  # Generate paper_id from paper content
+    
+    # Write the request
+    write_request(user_id, paper_id, model_a, model_b, vote)
+    
+    # Update the leaderboard
+    update_leaderboard(model_a, model_b, vote)
+    
+    # Fetch the updated leaderboard (optional, if you want to display it immediately)
+    leaderboard = get_leaderboard()
+    
+    message = f"<p>Thank you for your vote!</p><p>Model A: {model_a}</p><p>Model B: {model_b}</p>"
+    return gr.update(value=message, visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True)
 
 
 def setup_interface():
@@ -155,20 +185,12 @@ def setup_interface():
 
                 model_identity_message = gr.HTML("", visible=False)
 
-                def handle_vote(vote, model_a, model_b):
-                    print(f"Vote received: {vote}")
-                    message = f"<p>Thank you for your vote!</p><p>Model A: {model_a}</p><p>Model B: {model_b}</p>"
-                    return gr.update(value=message, visible=True), gr.update(visible=False), gr.update(visible=False), gr.update(visible=True)
+              
+                vote_button.click(fn=handle_vote, inputs=[vote, model_identity_message, model_identity_message],
+                                  outputs=[vote_message, vote, vote_button, another_paper_button])
 
-                vote_button.click(fn=handle_vote, inputs=[vote, model_identity_message, model_identity_message], outputs=[
-                                  vote_message, vote, vote_button, another_paper_button])
-
-                submit_button.click(
-                    fn=review_papers,
-                    inputs=[file_input],
-                    outputs=[review1, review2, vote, vote_button,
-                             model_identity_message, model_identity_message] 
-                )
+                submit_button.click(fn=review_papers, inputs=[file_input],
+                                    outputs=[review1, review2, vote, vote_button, model_identity_message, model_identity_message])
 
                 another_paper_button.click(
                     fn=lambda: None, inputs=None, outputs=None, js="() => { location.reload(); }")
@@ -242,6 +264,7 @@ def setup_interface():
                         </tbody>
                     </table>
                 """
+                leaderboard = get_leaderboard()
                 gr.HTML(leaderboard_html)
 
     logging.debug("Gradio interface setup complete.")
