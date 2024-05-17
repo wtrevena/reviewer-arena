@@ -9,7 +9,6 @@ from flask import request
 import hashlib
 import uuid
 
-
 setup_logging()
 paper_dir = 'path_to_temp_storage'
 prompt_dir = 'iclr2024'
@@ -22,7 +21,6 @@ api_keys = {
 
 use_real_api = False
 
-
 # Function to generate a paper_id using SHA-512 hash
 def generate_paper_id(paper_content):
     return hashlib.sha512(paper_content).hexdigest()
@@ -33,6 +31,7 @@ def get_user_ip():
 
 def review_papers(pdf_file):
     logging.info(f"Received file type: {type(pdf_file)}")
+    paper_content = pdf_file.read()  # Read the content of the uploaded PDF file
     if use_real_api:
         reviews, selected_models = process_paper(
             pdf_file, paper_dir, prompt_dir, api_keys)
@@ -90,12 +89,12 @@ def review_papers(pdf_file):
     model_b = selected_models[1]
 
     logging.debug(f"Final formatted reviews: {review_texts}")
-    return review_texts[0], review_texts[1], gr.update(visible=True), gr.update(visible=True), model_a, model_b
+    return review_texts[0], review_texts[1], gr.update(visible=True), gr.update(visible=True), model_a, model_b, paper_content
 
 
 def handle_vote(vote, model_a, model_b, paper_content):
     user_id = get_user_ip()  # Get the user IP address as user_id
-    paper_id = generate_paper_id(paper_content.encode('utf-8'))  # Generate paper_id from paper content
+    paper_id = generate_paper_id(paper_content)  # Generate paper_id from paper content
     
     # Write the request
     write_request(user_id, paper_id, model_a, model_b, vote)
@@ -185,12 +184,14 @@ def setup_interface():
 
                 model_identity_message = gr.HTML("", visible=False)
 
-              
-                vote_button.click(fn=handle_vote, inputs=[vote, model_identity_message, model_identity_message],
+                def handle_vote_interface(vote, model_identity_message_a, model_identity_message_b, paper_content):
+                    return handle_vote(vote, model_identity_message_a, model_identity_message_b, paper_content)
+
+                vote_button.click(fn=handle_vote_interface, inputs=[vote, model_identity_message, model_identity_message, paper_content],
                                   outputs=[vote_message, vote, vote_button, another_paper_button])
 
                 submit_button.click(fn=review_papers, inputs=[file_input],
-                                    outputs=[review1, review2, vote, vote_button, model_identity_message, model_identity_message])
+                                    outputs=[review1, review2, vote, vote_button, model_identity_message, model_identity_message, paper_content])
 
                 another_paper_button.click(
                     fn=lambda: None, inputs=None, outputs=None, js="() => { location.reload(); }")
