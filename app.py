@@ -48,32 +48,7 @@ def review_papers(pdf_file):
         reviews = processed_reviews
     else:
         reviews = [
-            {
-                "Summary": "This is a placeholder review for Model 1. The paper explores advanced methodologies in reinforcement learning applied to autonomous driving systems, proposing significant enhancements to decision-making algorithms that could improve safety and operational efficiency. The authors provide a detailed analysis of the current limitations of existing systems and suggest innovative solutions that could transform the field.",
-                "Soundness": "The assumptions underlying the proposed enhancements are occasionally not fully justified, particularly concerning the scalability of the algorithms under varied and unpredictable traffic conditions. A more rigorous examination of these assumptions is necessary to solidify the paper's foundation.",
-                "Presentation": "While the paper is structured adequately, some sections delve into technical details that are not sufficiently elucidated for a broader audience. This could potentially limit the paper's impact and accessibility, making it challenging for non-specialists to fully grasp the implications of the research.",
-                "Contribution": "The paper makes a moderate contribution to the existing body of knowledge, offering incremental improvements over current methodologies rather than a completely novel approach. However, these improvements are significant and could lead to better practical implementations in the field of autonomous driving.",
-                "Strengths": "The initial results presented in the paper are promising, showing potential for the proposed methods. The inclusion of real-world data in the preliminary experiments adds a layer of credibility and relevance to the results, showcasing the practical applicability of the research.",
-                "Weaknesses": "The paper lacks detailed exposition on the methodology, particularly in how the algorithms adapt to unexpected or novel scenarios. This is a critical area that requires further development and testing to ensure the robustness and reliability of the proposed solutions.",
-                "Questions/Suggestions": "The statistical analysis section could be enhanced by incorporating more robust statistical techniques and a wider array of metrics. Additionally, conducting tests in a variety of driving environments could help in substantiating the claims made and strengthen the overall findings of the research.",
-                "Ethics Review": "The research complies with all ethical standards, addressing potential ethical issues related to autonomous driving comprehensively. Issues such as privacy concerns, decision-making in critical situations, and the overall impact on societal norms are discussed and handled with the utmost care.",
-                "Overall Score": "3/5",
-                "Confidence": "Confidence in the findings is moderate. While the initial results are encouraging, the limited scope of testing and some unresolved questions regarding scalability and robustness temper the confidence in these results.",
-                "Code of Conduct": "There are no violations of the code of conduct noted. The research upholds ethical standards and maintains transparency in methodologies and data usage, contributing to its integrity and the trustworthiness of the findings."
-            },
-            {
-                "Summary": "This is a placeholder review for Model 2. The paper explores advanced methodologies in reinforcement learning applied to autonomous driving systems, proposing significant enhancements to decision-making algorithms that could improve safety and operational efficiency. The authors provide a detailed analysis of the current limitations of existing systems and suggest innovative solutions that could transform the field.",
-                "Soundness": "The assumptions underlying the proposed enhancements are occasionally not fully justified, particularly concerning the scalability of the algorithms under varied and unpredictable traffic conditions. A more rigorous examination of these assumptions is necessary to solidify the paper's foundation.",
-                "Presentation": "While the paper is structured adequately, some sections delve into technical details that are not sufficiently elucidated for a broader audience. This could potentially limit the paper's impact and accessibility, making it challenging for non-specialists to fully grasp the implications of the research.",
-                "Contribution": "The paper makes a moderate contribution to the existing body of knowledge, offering incremental improvements over current methodologies rather than a completely novel approach. However, these improvements are significant and could lead to better practical implementations in the field of autonomous driving.",
-                "Strengths": "The initial results presented in the paper are promising, showing potential for the proposed methods. The inclusion of real-world data in the preliminary experiments adds a layer of credibility and relevance to the results, showcasing the practical applicability of the research.",
-                "Weaknesses": "The paper lacks detailed exposition on the methodology, particularly in how the algorithms adapt to unexpected or novel scenarios. This is a critical area that requires further development and testing to ensure the robustness and reliability of the proposed solutions.",
-                "Questions/Suggestions": "The statistical analysis section could be enhanced by incorporating more robust statistical techniques and a wider array of metrics. Additionally, conducting tests in a variety of driving environments could help in substantiating the claims made and strengthen the overall findings of the research.",
-                "Ethics Review": "The research complies with all ethical standards, addressing potential ethical issues related to autonomous driving comprehensively. Issues such as privacy concerns, decision-making in critical situations, and the overall impact on societal norms are discussed and handled with the utmost care.",
-                "Overall Score": "3/5",
-                "Confidence": "Confidence in the findings is moderate. While the initial results are encouraging, the limited scope of testing and some unresolved questions regarding scalability and robustness temper the confidence in these results.",
-                "Code of Conduct": "There are no violations of the code of conduct noted. The research upholds ethical standards and maintains transparency in methodologies and data usage, contributing to its integrity and the trustworthiness of the findings."
-            }
+            # Placeholder reviews
         ]
         selected_models = ['model1-placeholder', 'model2-placeholder']
 
@@ -90,7 +65,6 @@ def review_papers(pdf_file):
 
     logging.debug(f"Final formatted reviews: {review_texts}")
     return review_texts[0], review_texts[1], gr.update(visible=True), gr.update(visible=True), model_a, model_b, paper_content
-
 
 def handle_vote(vote, model_a, model_b, paper_content):
     user_id = get_user_ip()  # Get the user IP address as user_id
@@ -159,12 +133,10 @@ def setup_interface():
         with gr.Tabs():
             with gr.TabItem("Reviewer Arena"):
                 gr.Markdown("## Reviewer Arena")
-                gr.Markdown(
-                    "Upload an academic paper to get reviews from two randomly selected LLMs.")
+                gr.Markdown("Upload an academic paper to get reviews from two randomly selected LLMs.")
                 with gr.Row():
                     file_input = gr.File(label="Upload Academic Paper")
-                    submit_button = gr.Button(
-                        "Submit!", elem_id="submit-button")
+                    submit_button = gr.Button("Submit!", elem_id="submit-button")
                 with gr.Row():
                     with gr.Column():
                         gr.HTML("<div class='model-label'>Model A</div>")
@@ -173,28 +145,25 @@ def setup_interface():
                         gr.HTML("<div class='model-label'>Model B</div>")
                         review2 = gr.Markdown()
 
-                vote_options = ["👍 A is better",
-                                "👍 B is better", "👔 Tie", "👎 Both are bad"]
-                vote = gr.Radio(label="Vote on the best model",
-                                choices=vote_options, value="Tie", visible=False)
+                vote_options = ["👍 A is better", "👍 B is better", "👔 Tie", "👎 Both are bad"]
+                vote = gr.Radio(label="Vote on the best model", choices=vote_options, value="Tie", visible=False)
                 vote_button = gr.Button("Submit Vote", visible=False)
                 vote_message = gr.HTML("", visible=False)
-                another_paper_button = gr.Button(
-                    "Review another paper", visible=False)
+                another_paper_button = gr.Button("Review another paper", visible=False)
 
                 model_identity_message = gr.HTML("", visible=False)
 
                 def handle_vote_interface(vote, model_identity_message_a, model_identity_message_b, paper_content):
                     return handle_vote(vote, model_identity_message_a, model_identity_message_b, paper_content)
 
-                vote_button.click(fn=handle_vote_interface, inputs=[vote, model_identity_message, model_identity_message, paper_content],
+                submit_button.click(fn=review_papers, inputs=[file_input],
+                                    outputs=[review1, review2, vote, vote_button, model_identity_message, model_identity_message, "paper_content"])
+
+                vote_button.click(fn=handle_vote_interface, inputs=[vote, model_identity_message, model_identity_message, "paper_content"],
                                   outputs=[vote_message, vote, vote_button, another_paper_button])
 
-                submit_button.click(fn=review_papers, inputs=[file_input],
-                                    outputs=[review1, review2, vote, vote_button, model_identity_message, model_identity_message, paper_content])
+                another_paper_button.click(fn=lambda: None, inputs=None, outputs=None, js="() => { location.reload(); }")
 
-                another_paper_button.click(
-                    fn=lambda: None, inputs=None, outputs=None, js="() => { location.reload(); }")
             with gr.TabItem("Leaderboard"):
                 gr.Markdown("## Leaderboard")
                 leaderboard_html = """
