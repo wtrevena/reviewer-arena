@@ -167,7 +167,7 @@ def setup_interface():
     }
     """
     with gr.Blocks(css=css) as demo:
-        with gr.HTML("""
+        gr.HTML("""
             <input type="hidden" id="user-ip" value="">
             <script>
                 async function getUserIP() {
@@ -177,7 +177,7 @@ def setup_interface():
                 }
                 window.onload = getUserIP;
             </script>
-        """):
+        """)
             with gr.Tabs():
                 with gr.TabItem("Reviewer Arena"):
                     gr.Markdown("## Reviewer Arena")
