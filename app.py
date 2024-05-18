@@ -23,7 +23,7 @@ api_keys = {
     'openai_api_key': os.environ.get('openai_api_key'),
     'claude_api_key': os.environ.get('anthropic_api_key'),
     'gemini_api_key': os.environ.get('gemini_api_key'),
-    'commandr_api_key': os.environ.get('cohere_api_key')
+    'commandr_api_key': os.environ.get('commandr_api_key')
 }
 
 use_real_api = True
