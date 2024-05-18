@@ -3,7 +3,8 @@ import os
 import logging
 import random
 from models import Paper, PaperProcessor
-
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
 
 def extract_text_from_pdf(filename):
     with fitz.open(filename) as pdf_document:
@@ -33,13 +34,24 @@ def process_paper(pdf_file, paper_dir, prompt_dir, api_keys):
     paper = Paper(pdf_file.name if hasattr(pdf_file, 'name')
                   else os.path.basename(pdf_path), extracted_text)
 
-    models = ['gpt', 'claude', 'gemini', 'commandr']
+    models = ['gpt-4-turbo-2024-04-09', 'gpt-4o', 'claude-3-opus-20240229', 'gemini-pro', 'command-r-plus']
     selected_models = random.sample(models, 2)
 
     reviews = []
-    for model in selected_models:
+
+    def process_with_model(model):
         processor = PaperProcessor(prompt_dir, model, **api_keys)
-        review_text = processor.process_paper(paper)
-        reviews.append(review_text)
+        return processor.process_paper(paper)
+
+    with ThreadPoolExecutor() as executor:
+        future_to_model = {executor.submit(process_with_model, model): model for model in selected_models}
+        for future in concurrent.futures.as_completed(future_to_model):
+            model = future_to_model[future]
+            try:
+                review_text = future.result()
+                reviews.append(review_text)
+            except Exception as exc:
+                logging.error(f"Model {model} generated an exception: {exc}")
+
     logging.debug(f"Reviews generated: {reviews}")
     return reviews, selected_models

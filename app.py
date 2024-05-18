@@ -22,11 +22,11 @@ prompt_dir = 'iclr2024'
 api_keys = {
     'openai_api_key': os.environ.get('openai_api_key'),
     'claude_api_key': os.environ.get('anthropic_api_key'),
-    'gemini_api_key': os.environ.get('google_api_key'),
+    'gemini_api_key': os.environ.get('gemini_api_key'),
     'commandr_api_key': os.environ.get('cohere_api_key')
 }
 
-use_real_api = False
+use_real_api = True
 
 # Function to generate a paper_id using SHA-512 hash
 def generate_paper_id(paper_content):
@@ -204,50 +204,49 @@ def setup_interface():
 
             with gr.TabItem("Leaderboard"):
                 gr.Markdown("## Leaderboard")
-
-                # Fetch the leaderboard data from the database
-                leaderboard_data = get_leaderboard()
-                # print(leaderboard_data)
                 
-                # Create the leaderboard HTML dynamically
-                leaderboard_html = """
-                    <table style="width:100%; border: 1px solid #444; border-collapse: collapse; font-family: Arial, sans-serif; background-color: #2b2b2b;">
-                        <thead>
-                            <tr style="border: 1px solid #444; padding: 12px; background-color: #1a1a1a;">
-                                <th style="border: 1px solid #444; padding: 12px; color: #ddd;">Rank</th>
-                                <th style="border: 1px solid #444; padding: 12px; color: #ddd;">Model</th>
-                                <th style="border: 1px solid #444; padding: 12px; color: #ddd;">Arena Elo</th>
-                                <th style="border: 1px solid #444; padding: 12px; color: #ddd;">95% CI</th>
-                                <th style="border: 1px solid #444; padding: 12px; color: #ddd;">Votes</th>
-                                <th style="border: 1px solid #444; padding: 12px; color: #ddd;">Organization</th>
-                                <th style="border: 1px solid #444; padding: 12px; color: #ddd;">License</th>
-                                <th style="border: 1px solid #444; padding: 12px; color: #ddd;">Knowledge Cutoff</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                """
-                
-                for rank, model in enumerate(leaderboard_data, start=1):
-                    leaderboard_html += f"""
-                        <tr style="border: 1px solid #444; padding: 12px;">
-                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{rank}</td>
-                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['ModelID']}</td>
-                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['EloScore']}</td>
-                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['CI_Lower']} - {model['CI_Upper']}</td>
-                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['Votes']}</td>
-                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Organization</td>
-                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">License</td>
-                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Knowledge Cutoff</td>
-                        </tr>
+                def refresh_leaderboard():
+                    leaderboard_data = get_leaderboard()
+                    leaderboard_html = """
+                        <table style="width:100%; border: 1px solid #444; border-collapse: collapse; font-family: Arial, sans-serif; background-color: #2b2b2b;">
+                            <thead>
+                                <tr style="border: 1px solid #444; padding: 12px; background-color: #1a1a1a;">
+                                    <th style="border: 1px solid #444; padding: 12px; color: #ddd;">Rank</th>
+                                    <th style="border: 1px solid #444; padding: 12px; color: #ddd;">Model</th>
+                                    <th style="border: 1px solid #444; padding: 12px; color: #ddd;">Arena Elo</th>
+                                    <th style="border: 1px solid #444; padding: 12px; color: #ddd;">95% CI</th>
+                                    <th style="border: 1px solid #444; padding: 12px; color: #ddd;">Votes</th>
+                                    <th style="border: 1px solid #444; padding: 12px; color: #ddd;">Organization</th>
+                                    <th style="border: 1px solid #444; padding: 12px; color: #ddd;">License</th>
+                                    <th style="border: 1px solid #444; padding: 12px; color: #ddd;">Knowledge Cutoff</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                     """
+                    
+                    for rank, model in enumerate(leaderboard_data, start=1):
+                        leaderboard_html += f"""
+                            <tr style="border: 1px solid #444; padding: 12px;">
+                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{rank}</td>
+                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['ModelID']}</td>
+                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['EloScore']}</td>
+                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['CI_Lower']} - {model['CI_Upper']}</td>
+                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['Votes']}</td>
+                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['Organization']}</td>
+                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['License']}</td>
+                                <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['KnowledgeCutoff']}</td>
+                            </tr>
+                        """
 
-                leaderboard_html += """
-                        </tbody>
-                    </table>
-                """
-                
-                gr.HTML(leaderboard_html)
-
+                    leaderboard_html += """
+                            </tbody>
+                        </table>
+                    """
+                    return gr.update(value=leaderboard_html)
+                new_html = get_leaderboard()
+                leaderboard_html = gr.HTML(new_html)
+                refresh_button = gr.Button("Refresh Leaderboard")
+                refresh_button.click(fn=refresh_leaderboard, inputs=[], outputs=[leaderboard_html])
 
     logging.debug("Gradio interface setup complete.")
     return demo
@@ -257,3 +256,4 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     demo = setup_interface()
     demo.launch()
+

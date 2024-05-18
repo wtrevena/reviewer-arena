@@ -22,7 +22,7 @@ class PaperProcessor:
     def __init__(self, prompt_dir, model, openai_api_key, claude_api_key, gemini_api_key, commandr_api_key):
         self.prompt_dir = prompt_dir
         self.model = model
-        self.openai_api_key = openai_api_key
+        self.openai_api_key = openai_api_key    
         self.claude_api_key = claude_api_key
         self.gemini_api_key = gemini_api_key
         self.commandr_api_key = commandr_api_key
@@ -55,7 +55,7 @@ class PaperProcessor:
         logging.info(f"Sending the following prompt to {model_type}: {prompt}")
 
         try:
-            if model_type == 'gpt':
+            if model_type == 'gpt-4-turbo-2024-04-09':
                 client = OpenAI(api_key=self.openai_api_key)
                 messages = [{"role": "system", "content": system_role}, {"role": "user", "content": prompt}]
                 completion = client.chat.completions.create(
@@ -63,9 +63,21 @@ class PaperProcessor:
                     messages=messages,
                     temperature=1
                 )
+                print(completion)
+                return completion.choices[0].message.content.strip()
+            
+            elif model_type == 'gpt-4o':
+                client = OpenAI(api_key=self.openai_api_key)
+                messages = [{"role": "system", "content": system_role}, {"role": "user", "content": prompt}]
+                completion = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=messages,
+                    temperature=1
+                )
+                print(completion)
                 return completion.choices[0].message.content.strip()
 
-            elif model_type == 'claude':
+            elif model_type == 'claude-3-opus-20240229':
                 client = anthropic.Anthropic(api_key=self.claude_api_key)
                 response = client.messages.create(
                     model='claude-3-opus-20240229',
@@ -74,25 +86,29 @@ class PaperProcessor:
                     temperature=0.5, 
                     messages=[{"role": "user", "content": prompt}]
                 )
+                print(response)
                 return response.content[0].text
 
-            elif model_type == 'commandr':
+            elif model_type == 'command-r-plus':
                 co = cohere.Client(self.commandr_api_key)
                 response = co.chat(
                     model="command-r-plus",
                     message=prompt,
                     preamble=system_role
                 )
+                print(response)
                 return response.text
 
-            elif model_type == 'gemini':
+            elif model_type == 'gemini-pro':
                 genai.configure(api_key=self.gemini_api_key)
                 model = genai.GenerativeModel('gemini-pro')
                 response = model.generate_content(prompt)
+                print(response)
                 return response.candidates[0].content.parts[0].text
 
         except Exception as e:
             logging.error(f"Exception occurred: {e}")
+            print(e)
             return None
 
     def is_content_appropriate(self, content):
