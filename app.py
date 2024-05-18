@@ -30,7 +30,7 @@ use_real_api = False
 
 # Function to generate a paper_id using SHA-512 hash
 def generate_paper_id(paper_content):
-    return hashlib.sha512(paper_content).hexdigest()
+    return hashlib.sha512(paper_content.encode('utf-8')).hexdigest()
 
 # Function to get user IP address
 def get_user_ip():
@@ -165,6 +165,9 @@ def setup_interface():
     }
     """
     with gr.Blocks(css=css) as demo:
+        paper_content_state = gr.State()
+        model_a_state = gr.State()
+        model_b_state = gr.State()
         with gr.Tabs():
             with gr.TabItem("Reviewer Arena"):
                 gr.Markdown("## Reviewer Arena")
@@ -188,13 +191,13 @@ def setup_interface():
 
                 model_identity_message = gr.HTML("", visible=False)
 
-                def handle_vote_interface(vote, model_identity_message_a, model_identity_message_b, paper_content):
-                    return handle_vote(vote, model_identity_message_a, model_identity_message_b, paper_content)
+                def handle_vote_interface(vote, model_a, model_b, paper_content):
+                    return handle_vote(vote, model_a, model_b, paper_content)
 
                 submit_button.click(fn=review_papers, inputs=[file_input],
-                                    outputs=[review1, review2, vote, vote_button, model_identity_message, model_identity_message])
+                                    outputs=[review1, review2, vote, vote_button, model_a_state, model_b_state, paper_content_state])
 
-                vote_button.click(fn=handle_vote_interface, inputs=[vote, model_identity_message, model_identity_message],
+                vote_button.click(fn=handle_vote_interface, inputs=[vote, model_a_state, model_b_state, paper_content_state],
                                   outputs=[vote_message, vote, vote_button, another_paper_button])
 
                 another_paper_button.click(fn=lambda: None, inputs=None, outputs=None, js="() => { location.reload(); }")
@@ -204,7 +207,7 @@ def setup_interface():
 
                 # Fetch the leaderboard data from the database
                 leaderboard_data = get_leaderboard()
-                print(leaderboard_data)
+                # print(leaderboard_data)
                 
                 # Create the leaderboard HTML dynamically
                 leaderboard_html = """
@@ -224,19 +227,19 @@ def setup_interface():
                         <tbody>
                 """
                 
-                # for rank, model in enumerate(leaderboard_data, start=1):
-                #     leaderboard_html += f"""
-                #         <tr style="border: 1px solid #444; padding: 12px;">
-                #             <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{rank}</td>
-                #             <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['ModelID']}</td>
-                #             <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['EloScore']}</td>
-                #             <td style="border: 1px solid #444; padding: 12px; color: #ddd;">+3/-3</td> <!-- Adjust as needed -->
-                #             <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['Votes']}</td>
-                #             <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Organization</td> <!-- Add actual data if available -->
-                #             <td style="border: 1px solid #444; padding: 12px; color: #ddd;">License</td> <!-- Add actual data if available -->
-                #             <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Knowledge Cutoff</td> <!-- Add actual data if available -->
-                #         </tr>
-                #     """
+                for rank, model in enumerate(leaderboard_data, start=1):
+                    leaderboard_html += f"""
+                        <tr style="border: 1px solid #444; padding: 12px;">
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{rank}</td>
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['ModelID']}</td>
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['EloScore']}</td>
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['CI_Lower']} - {model['CI_Upper']}</td>
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['Votes']}</td>
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Organization</td>
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">License</td>
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">Knowledge Cutoff</td>
+                        </tr>
+                    """
 
                 leaderboard_html += """
                         </tbody>
