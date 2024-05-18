@@ -37,6 +37,9 @@ def process_paper(pdf_file, paper_dir, prompt_dir, api_keys):
     models = ['gpt-4-turbo-2024-04-09', 'gpt-4o', 'claude-3-opus-20240229', 'gemini-pro', 'command-r-plus']
     selected_models = random.sample(models, 2)
 
+    # REPLACE ONE OF THE MODELS WITH command-r-plus
+    # selected_models = ['gpt-4o', 'command-r-plus']
+
     reviews = []
 
     def process_with_model(model):

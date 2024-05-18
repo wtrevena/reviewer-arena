@@ -22,10 +22,10 @@ class PaperProcessor:
     def __init__(self, prompt_dir, model, openai_api_key, claude_api_key, gemini_api_key, commandr_api_key):
         self.prompt_dir = prompt_dir
         self.model = model
-        self.openai_api_key = openai_api_key    
-        self.claude_api_key = claude_api_key
-        self.gemini_api_key = gemini_api_key
-        self.commandr_api_key = commandr_api_key
+        self.openai_api_key = os.environ.get('OPENAI_API_KEY')      
+        self.claude_api_key = os.environ.get('ANTHROPIC_API_KEY')
+        self.gemini_api_key = os.environ.get('GEMINI_API_KEY')
+        self.commandr_api_key = os.environ.get('COMMANDR_API_KEY')
 
     def count_tokens(self, text):
         return len(self.encoding.encode(text))

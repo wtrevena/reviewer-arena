@@ -20,10 +20,10 @@ setup_logging()
 paper_dir = 'path_to_temp_storage'
 prompt_dir = 'iclr2024'
 api_keys = {
-    'openai_api_key': os.environ.get('openai_api_key'),
-    'claude_api_key': os.environ.get('anthropic_api_key'),
-    'gemini_api_key': os.environ.get('gemini_api_key'),
-    'commandr_api_key': os.environ.get('commandr_api_key')
+    'openai_api_key': os.environ.get('OPENAI_API_KEY'),
+    'claude_api_key': os.environ.get('ANTHROPIC_API_KEY'),
+    'gemini_api_key': os.environ.get('GEMINI_API_KEY'),
+    'commandr_api_key': os.environ.get('COMMANDR_API_KEY')
 }
 
 use_real_api = True
