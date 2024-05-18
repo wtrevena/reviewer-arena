@@ -237,14 +237,50 @@ def setup_interface():
                                 <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['KnowledgeCutoff']}</td>
                             </tr>
                         """
-
                     leaderboard_html += """
                             </tbody>
                         </table>
                     """
                     return gr.update(value=leaderboard_html)
-                new_html = get_leaderboard()
-                leaderboard_html = gr.HTML(new_html)
+                
+                # Initial load of the leaderboard
+                leaderboard_data = get_leaderboard()
+                leaderboard_html_initial = """
+                    <table style="width:100%; border: 1px solid #444; border-collapse: collapse; font-family: Arial, sans-serif; background-color: #2b2b2b;">
+                        <thead>
+                            <tr style="border: 1px solid #444; padding: 12px; background-color: #1a1a1a;">
+                                <th style="border: 1px solid #444; padding: 12px; color: #ddd;">Rank</th>
+                                <th style="border: 1px solid #444; padding: 12px; color: #ddd;">Model</th>
+                                <th style="border: 1px solid #444; padding: 12px; color: #ddd;">Arena Elo</th>
+                                <th style="border: 1px solid #444; padding: 12px; color: #ddd;">95% CI</th>
+                                <th style="border: 1px solid #444; padding: 12px; color: #ddd;">Votes</th>
+                                <th style="border: 1px solid #444; padding: 12px; color: #ddd;">Organization</th>
+                                <th style="border: 1px solid #444; padding: 12px; color: #ddd;">License</th>
+                                <th style="border: 1px solid #444; padding: 12px; color: #ddd;">Knowledge Cutoff</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                """
+                
+                for rank, model in enumerate(leaderboard_data, start=1):
+                    leaderboard_html_initial += f"""
+                        <tr style="border: 1px solid #444; padding: 12px;">
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{rank}</td>
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['ModelID']}</td>
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['EloScore']}</td>
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['CI_Lower']} - {model['CI_Upper']}</td>
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['Votes']}</td>
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['Organization']}</td>
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['License']}</td>
+                            <td style="border: 1px solid #444; padding: 12px; color: #ddd;">{model['KnowledgeCutoff']}</td>
+                        </tr>
+                    """
+                leaderboard_html_initial += """
+                        </tbody>
+                    </table>
+                """
+
+                leaderboard_html = gr.HTML(leaderboard_html_initial)
                 refresh_button = gr.Button("Refresh Leaderboard")
                 refresh_button.click(fn=refresh_leaderboard, inputs=[], outputs=[leaderboard_html])
 
