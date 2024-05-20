@@ -171,7 +171,7 @@ def setup_interface():
         with gr.Tabs():
             with gr.TabItem("Reviewer Arena"):
                 gr.Markdown("## Reviewer Arena")
-                gr.Markdown("Upload an academic paper to get reviews from two randomly selected LLMs.")
+                gr.Markdown("Reviewer Arena is a service for evaluating reviewer quality based on human and LLM preferences, by direct and anonymous comparison of reviews.")
                 with gr.Row():
                     file_input = gr.File(label="Upload Academic Paper")
                     submit_button = gr.Button("Submit!", elem_id="submit-button")
