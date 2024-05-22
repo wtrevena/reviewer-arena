@@ -17,7 +17,7 @@ class Paper:
 
 class PaperProcessor:
     MAX_TOKENS = 127192
-    encoding = tiktoken.encoding_for_model("gpt-4-0125-preview")
+    encoding = tiktoken.encoding_for_model("gpt-4")
 
     def __init__(self, prompt_dir, model, openai_api_key, claude_api_key, gemini_api_key, commandr_api_key):
         self.prompt_dir = prompt_dir
@@ -42,6 +42,8 @@ class PaperProcessor:
         return content
 
     def prepare_base_prompt(self, paper):
+        logging.debug(f"Preparing base prompt for paper: {paper.arxiv_id}")
+        logging.debug(f"Paper content: {paper.tex_file[:500]}")  # Log the first 500 characters
         return paper.tex_file
 
     def call_model(self, prompt, model_type):
@@ -127,6 +129,7 @@ class PaperProcessor:
         start_time = time.time()
 
         base_prompt = self.prepare_base_prompt(paper)
+        print("BASE PROMPT:", base_prompt)
         if base_prompt is None:
             return "Error: Base prompt could not be prepared."
 
